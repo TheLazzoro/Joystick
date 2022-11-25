@@ -1,9 +1,13 @@
-#include <Arduino.h>
-//#include <ESP8266WiFi.h>
+//#include <Arduino.h>
+#include <wifi_functionality.h>
+#include <WiFiManager.h>
 
 int x = 0;
 int y = 0;
 int b = 0; // joystick "middle" button
+
+int inputX = 34;
+int inputY = 35;
 
 int motorSpeedA;
 int motorSpeedB;
@@ -13,15 +17,16 @@ bool isLeftReverse = false;
 void setup()
 {
 	// put your setup code here, to run once:
-	Serial.begin(9600);
-	pinMode(8, INPUT);
-	digitalWrite(8, HIGH);
+	Serial.begin(115200);
+	pinMode(inputX, INPUT);
+	pinMode(inputY, INPUT);
+	//digitalWrite(8, HIGH);
 }
 
 void loop()
 {
-	x = analogRead(A0) / 2 - 256;
-	y = analogRead(A1) / 2 - 256;
+	x = analogRead(inputX) / 8 - 256;
+	y = analogRead(inputY) / 8 - 256;
 	b = digitalRead(9);
 	Serial.print("\n");
 
@@ -47,12 +52,12 @@ void loop()
 	else
 		motorSpeedB += y;
 
-	// Right steering correction
+	// Right steering
 	if (motorSpeedA < 0)
 		motorSpeedA = 0;
 	else if (motorSpeedA > 255)
 		motorSpeedA = 255;
-	// Left steering correction
+	// Left steering
 	if (motorSpeedB < 0)
 		motorSpeedB = 0;
 	else if (motorSpeedB > 255)
