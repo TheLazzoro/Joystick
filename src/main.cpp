@@ -17,6 +17,7 @@ bool isLeftReverse = false;
 
 const char *ssid = "Car-Access-Point";
 const char *pass = "?";
+const char* serverNameSpeed = "http://192.168.4.1/speed";
 const char* serverNameTest = "http://192.168.4.1/test";
 
 void setup()
@@ -49,14 +50,24 @@ void setup()
 	delay(3000);
 }
 
+int count = 0;
 void loop()
 {
 	if (WiFi.status() == WL_CONNECTED)
 	{
-		HTTPClient http;
-		http.begin(serverNameTest);
-		Serial.println(http.GET());
-		delay(1000);
+		HTTPClient httpSpeed;
+		HTTPClient httpTest;
+		httpSpeed.begin(serverNameSpeed);
+		httpTest.begin(serverNameTest);
+		httpSpeed.addHeader("Content-Type", "text/plain");
+		String postData = "1:2:3:4";
+		Serial.print("Test: ");
+		Serial.println(httpTest.GET());
+		//Serial.println(httpSpeed.POST(postData));
+		count += 1;
+		Serial.println(count);
+		Serial.println("");
+		delay(60);
 		return;
 	}
 
