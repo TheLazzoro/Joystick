@@ -1,6 +1,6 @@
 //#include <Arduino.h>
 #include <wifi_functionality.h>
-#include <WiFiManager.h>
+#include <WiFi.h>
 
 int x = 0;
 int y = 0;
@@ -8,11 +8,16 @@ int b = 0; // joystick "middle" button
 
 int inputX = 34;
 int inputY = 35;
+int inputMiddleButton = 32;
 
 int motorSpeedA;
 int motorSpeedB;
 bool isRightReverse = false;
 bool isLeftReverse = false;
+
+const char wifi_name[] = "WiFimodem-9846";
+const char wifi_pass[] = "jwmymdz4yw";
+WiFiManager wifiManager;
 
 void setup()
 {
@@ -20,14 +25,19 @@ void setup()
 	Serial.begin(115200);
 	pinMode(inputX, INPUT);
 	pinMode(inputY, INPUT);
-	//digitalWrite(8, HIGH);
+	pinMode(inputMiddleButton, INPUT);
+
+	WiFi.mode(WIFI_STA);
+	bool connected = WiFi.softAP(wifi_name, wifi_pass);
+	Serial.println(String(connected));
+	delay(3000);
 }
 
 void loop()
 {
 	x = analogRead(inputX) / 8 - 256;
 	y = analogRead(inputY) / 8 - 256;
-	b = digitalRead(9);
+	b = digitalRead(inputMiddleButton);
 	Serial.print("\n");
 
 	// initial forward/backwards movement
