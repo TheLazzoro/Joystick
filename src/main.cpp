@@ -15,8 +15,9 @@ int motorSpeedB;
 bool isRightReverse = false;
 bool isLeftReverse = false;
 
-const char* ssid = "Car-Access-Point";
-const char* pass = "?";
+const char *ssid = "Car-Access-Point";
+const char *pass = "?";
+const char* serverNameTest = "http://192.168.4.1/test";
 
 void setup()
 {
@@ -26,15 +27,23 @@ void setup()
 	pinMode(inputY, INPUT);
 	pinMode(inputMiddleButton, INPUT);
 
-	//WiFi.mode(WIFI_STA);
+	// connecting -> disconnecting -> reconnecting makes it work for whatever reason.
 	WiFi.begin(ssid);
-	Serial.print("Connecting...");
-	while(WiFi.status() != WL_CONNECTED) {
+	delay(1000);
+	WiFi.disconnect();
+	delay(1000);
+	WiFi.begin(ssid);
+
+	Serial.print("Connecting");
+	while (WiFi.status() != WL_CONNECTED)
+	{
 		delay(500);
 		Serial.print(".");
 	}
 	Serial.println("");
-	Serial.print("Connected to IP: ");
+	Serial.print("Connected to Wifi network: ");
+	Serial.println(ssid);
+	Serial.print("Local IP: ");
 	Serial.println(WiFi.localIP());
 
 	delay(3000);
@@ -42,6 +51,15 @@ void setup()
 
 void loop()
 {
+	if (WiFi.status() == WL_CONNECTED)
+	{
+		HTTPClient http;
+		http.begin(serverNameTest);
+		Serial.println(http.GET());
+		delay(1000);
+		return;
+	}
+
 	x = analogRead(inputX) / 8 - 256;
 	y = analogRead(inputY) / 8 - 256;
 	b = digitalRead(inputMiddleButton);
