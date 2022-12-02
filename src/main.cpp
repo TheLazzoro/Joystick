@@ -1,6 +1,6 @@
 //#include <Arduino.h>
-#include <wifi_functionality.h>
 #include <WiFi.h>
+#include <HTTPClient.h>
 
 int x = 0;
 int y = 0;
@@ -15,9 +15,8 @@ int motorSpeedB;
 bool isRightReverse = false;
 bool isLeftReverse = false;
 
-const char wifi_name[] = "WiFimodem-9846";
-const char wifi_pass[] = "jwmymdz4yw";
-WiFiManager wifiManager;
+const char* ssid = "Car-Access-Point";
+const char* pass = "?";
 
 void setup()
 {
@@ -27,9 +26,17 @@ void setup()
 	pinMode(inputY, INPUT);
 	pinMode(inputMiddleButton, INPUT);
 
-	WiFi.mode(WIFI_STA);
-	bool connected = WiFi.softAP(wifi_name, wifi_pass);
-	Serial.println(String(connected));
+	//WiFi.mode(WIFI_STA);
+	WiFi.begin(ssid);
+	Serial.print("Connecting...");
+	while(WiFi.status() != WL_CONNECTED) {
+		delay(500);
+		Serial.print(".");
+	}
+	Serial.println("");
+	Serial.print("Connected to IP: ");
+	Serial.println(WiFi.localIP());
+
 	delay(3000);
 }
 
