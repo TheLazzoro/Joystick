@@ -1,6 +1,7 @@
 //#include <Arduino.h>
+#include <ESPAsyncWebServer.h>
 #include <WiFi.h>
-#include <HTTPClient.h>
+
 
 int x = 0;
 int y = 0;
@@ -16,9 +17,11 @@ bool isRightReverse = false;
 bool isLeftReverse = false;
 
 const char *ssid = "Car-Access-Point";
-const char *pass = "?";
-const char* serverNameSpeed = "http://192.168.4.1/speed";
-const char* serverNameTest = "http://192.168.4.1/test";
+const char *pass = "car";
+AsyncWebServer server(80);
+const char *PARAM_MESSAGE = "message";
+
+void responseGetJoystickInput(AsyncWebServerRequest *request);
 
 void setup()
 {
@@ -28,49 +31,41 @@ void setup()
 	pinMode(inputY, INPUT);
 	pinMode(inputMiddleButton, INPUT);
 
-	// connecting -> disconnecting -> reconnecting makes it work for whatever reason.
-	WiFi.begin(ssid);
-	delay(1000);
-	WiFi.disconnect();
-	delay(1000);
-	WiFi.begin(ssid);
+	Serial.println("Access point setup...");
+	WiFi.mode(WIFI_STA);
+	WiFi.softAP(ssid);
+	// For some reason the network does not show up when setting a password.
+	// WiFi.softAP(ssid, pass);
 
-	Serial.print("Connecting");
-	while (WiFi.status() != WL_CONNECTED)
-	{
-		delay(500);
-		Serial.print(".");
-	}
-	Serial.println("");
-	Serial.print("Connected to Wifi network: ");
-	Serial.println(ssid);
-	Serial.print("Local IP: ");
-	Serial.println(WiFi.localIP());
+	IPAddress IP = WiFi.softAPIP();
+	Serial.print("IP: ");
+	Serial.println(IP);
+
+	server.on("/joystick", HTTP_GET, responseGetJoystickInput);
+	server.begin();
+	Serial.println("Server started.");
 
 	delay(3000);
 }
 
-int count = 0;
+String readJoystickInput()
+{
+	return String(
+		String(motorSpeedA) + ":" +
+		String(motorSpeedB) + ":" +
+		String(isRightReverse) + ":" +
+		String(isLeftReverse)
+		);
+}
+
+void responseGetJoystickInput(AsyncWebServerRequest *request)
+{
+	request->send_P(200, "text/html", readJoystickInput().c_str());
+}
+
+
 void loop()
 {
-	if (WiFi.status() == WL_CONNECTED)
-	{
-		HTTPClient httpSpeed;
-		HTTPClient httpTest;
-		httpSpeed.begin(serverNameSpeed);
-		httpTest.begin(serverNameTest);
-		httpSpeed.addHeader("Content-Type", "text/plain");
-		String postData = "1:2:3:4";
-		Serial.print("Test: ");
-		Serial.println(httpTest.GET());
-		//Serial.println(httpSpeed.POST(postData));
-		count += 1;
-		Serial.println(count);
-		Serial.println("");
-		delay(60);
-		return;
-	}
-
 	x = analogRead(inputX) / 8 - 256;
 	y = analogRead(inputY) / 8 - 256;
 	b = digitalRead(inputMiddleButton);
