@@ -1,15 +1,16 @@
-//#include <Arduino.h>
+// #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include <WiFi.h>
-
 
 int x = 0;
 int y = 0;
 int b = 0; // joystick "middle" button
 
-int inputX = 34;
-int inputY = 35;
-int inputMiddleButton = 32;
+int pinPower = 27;
+int pinGround = 26;
+int pinX = 34;
+int pinY = 35;
+int pinMiddleButton = 32;
 
 int motorSpeedA;
 int motorSpeedB;
@@ -22,14 +23,18 @@ AsyncWebServer server(80);
 const char *PARAM_MESSAGE = "message";
 
 void responseGetJoystickInput(AsyncWebServerRequest *request);
+int Volt2ReadVal(float volt);
 
 void setup()
 {
-	// put your setup code here, to run once:
 	Serial.begin(115200);
-	pinMode(inputX, INPUT);
-	pinMode(inputY, INPUT);
-	pinMode(inputMiddleButton, INPUT);
+	pinMode(pinX, INPUT);
+	pinMode(pinY, INPUT);
+	pinMode(pinMiddleButton, INPUT);
+	pinMode(pinPower, OUTPUT);
+	pinMode(pinGround, OUTPUT);
+	analogWrite(pinPower, Volt2ReadVal(3.0));
+	analogWrite(pinGround, LOW);
 
 	Serial.println("Access point setup...");
 	WiFi.mode(WIFI_STA);
@@ -54,8 +59,7 @@ String readJoystickInput()
 		String(motorSpeedA) + ":" +
 		String(motorSpeedB) + ":" +
 		String(isRightReverse) + ":" +
-		String(isLeftReverse)
-		);
+		String(isLeftReverse));
 }
 
 void responseGetJoystickInput(AsyncWebServerRequest *request)
@@ -63,13 +67,19 @@ void responseGetJoystickInput(AsyncWebServerRequest *request)
 	request->send_P(200, "text/html", readJoystickInput().c_str());
 }
 
+int Volt2ReadVal(float volt)
+{
+	if(volt > 5)
+		volt = 5;
+		
+	return volt * 204;
+}
 
 void loop()
 {
-	x = analogRead(inputX) / 8 - 256;
-	y = analogRead(inputY) / 8 - 256;
-	b = digitalRead(inputMiddleButton);
-	Serial.print("\n");
+	x = analogRead(pinX) / 8 - 256;
+	y = analogRead(pinY) / 8 - 256;
+	b = digitalRead(pinMiddleButton);
 
 	// initial forward/backwards movement
 	motorSpeedA = x;
@@ -104,7 +114,9 @@ void loop()
 	else if (motorSpeedB > 255)
 		motorSpeedB = 255;
 
-	Serial.print("A Speed: " + String(motorSpeedA) +
+	//Serial.println("x: " + String(analogRead(pinX)) + "   y: " + String(analogRead(pinY)));
+
+	Serial.println("A Speed: " + String(motorSpeedA) +
 				 "     B Speed: " + String(motorSpeedB) +
 				 "     revA: " + String(isRightReverse) +
 				 "     revB: " + String(isLeftReverse) +
