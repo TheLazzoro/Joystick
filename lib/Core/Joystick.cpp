@@ -18,7 +18,7 @@ void Joystick::Setup()
     pinMode(pinMiddleButton, INPUT);
     pinMode(pinPower, OUTPUT);
     pinMode(pinGround, OUTPUT);
-    analogWrite(pinPower, Utility::Volt2ReadVal(3.0));
+    analogWrite(pinPower, Utility::Volt2ReadVal(3.0)); // mystery. This value is 'LOW' but setting it to 'LOW' yields wrong joystick values.
     analogWrite(pinGround, LOW);
 }
 

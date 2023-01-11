@@ -3,6 +3,8 @@
 
 const char *WiFi_Helper::ssid = "Car-Access-Point";
 const char *WiFi_Helper::pass = "car";
+String WiFi_Helper::IP;
+bool WiFi_Helper::isUp;
 AsyncWebServer server(80);
 
 String WiFi_Helper::SerializeJoystickInput()
@@ -23,11 +25,13 @@ void WiFi_Helper::Setup()
 {
     Serial.println("Access point setup...");
 	WiFi.mode(WIFI_STA);
-	WiFi.softAP(ssid);
+	isUp = WiFi.softAP(ssid);
 	// For some reason the network does not show up when setting a password.
 	// WiFi.softAP(ssid, pass);
 
-	IPAddress IP = WiFi.softAPIP();
+	IPAddress ipAddress = WiFi.softAPIP();
+	IP = ipAddress.toString();
+
 	Serial.print("IP: ");
 	Serial.println(IP);
 
